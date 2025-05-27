@@ -13,10 +13,10 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
-from GeorgiaManou.Tools.SMPA_tools_V03 import *
+from Tools.SMPA_tools_WV01 import *
 
 st.set_page_config(
-    page_title="SMPA @ JRC Petten",
+    page_title="My 1st Streamlit App",
     page_icon="👋",
     layout="wide",
     initial_sidebar_state="expanded"
