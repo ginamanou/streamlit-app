@@ -1,0 +1,2 @@
+# This empty file with this exact name is necessary to exist in the same folder as the SMPA_tools_Georgia, 
+# in order for this folder to be recognizable as a module when the main script that we run is not in the same folder as the tools.
