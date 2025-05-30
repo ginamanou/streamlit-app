@@ -63,7 +63,7 @@ with st.sidebar:
         - Make sure that you load **csv** files that do not contain any special characters.
         - The structure of the files needs to only involve **a header and the data.**  
                   
-          If there are extra description or other rows at the beginning or at the end **they should be first removed** !!   
+          If there is extra description or other rows at the beginning or at the end **they should be first removed** !!   
             """)
     
 with st.expander(" :arrow_heading_up: Imports section", expanded=True):
