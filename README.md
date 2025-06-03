@@ -14,4 +14,4 @@ Since the application is not deployed, it can be launched by cloning the reposit
 streamlit run <full path to streamlit_app_WV01.py>
 ```
 
-For the sake of exploring and testing the capabilities of the app, two made-up datasets -one reproduced for uniaxial creep simulation and one for small punch creep are provided.
+For the sake of exploring and testing the capabilities of the app, two made-up datasets -one reproduced for uniaxial creep simulation and one for small punch creep- are provided.
