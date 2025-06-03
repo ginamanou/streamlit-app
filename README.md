@@ -11,5 +11,7 @@ This web app is not intended to be used for actual analysis of real-life experim
 Since the application is not deployed, it can be launched by cloning the repository locally, installing all the necessary dependencies as described in the requirements.txt file, and running the following line of code from the Terminal:
 
 ```
-streamlit run stramlit_app_WV01.py
+streamlit run <full path to streamlit_app_WV01.py>
 ```
+
+For the sake of exploring and testing the capabilities of the app, two made-up datasets -one reproduced for uniaxial creep simulation and one for small punch creep are provided.
