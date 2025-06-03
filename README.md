@@ -8,8 +8,8 @@ This web app is not intended to be used for actual analysis of real-life experim
 
 ## Usage
 
-After the necessary dependencies have been installed as per descrived in the requirements.txt file, the application can be run from the terminal as following:
+After the necessary dependencies have been installed as described in the requirements.txt file, the application can be run from the Terminal as following:
 
 ```
-streamlit run <python file with .py extension>
+streamlit run <path to python file including the .py extension>
 ```
