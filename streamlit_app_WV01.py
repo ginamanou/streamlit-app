@@ -574,7 +574,7 @@ with st.expander(" :arrow_right: Analysis section", expanded=False):
                         col1.markdown('''
                                     In some cases, it has been noticed that the deflection rate curve presents two minima instead of one.  
                                     There is no clear answer to why this happens, but it could be an indication of cracking at some point during the experiment.  
-                                    It is suggested that that before making any conclusions, you first make sure that the temperature profile didn't deviate considerably from the target.   
+                                    It is suggested that before making any conclusions, you first make sure that the temperature profile didn't deviate considerably from the target.   
                                     By checking the box below, both minima will be identified by the algorithm.  
                                     ''')
                         double_min = col1.checkbox("Double minimum", key='double_min')
