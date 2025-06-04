@@ -183,13 +183,13 @@ with st.expander(" :arrow_heading_up: Data entry", expanded=True):
                                     trace_spc_2.append(trace_fd)
                                 except KeyError:
                                     catch_col_spel_error = True
-                                    st.markdown(":red[**Attention!!**] Check again the spelling of the column names")
+                                    st.markdown(":red[**Attention!!**] Check again the spelling of the column names.")
                             else:
                                 catch_col_same_name_error = True
                                 st.markdown(":red[**Attention!!**] You have selected the same column name for different data. Revise your entries above in order to continue.")
                         else:
                             catch_col_empty_error = True
-                            st.markdown(":red[**Attention!!**] One of the column names has been left empty. Revise your entry data")
+                            st.markdown(":red[**Attention!!**] One or more of the requested column names has been left empty. Revise your entries above in order to continue.")
 
                 if (st.session_state.type_of_exp == "Uniaxial creep") & (st.session_state.df_added == "valid"):
                     count_blanks_uc = 0
@@ -245,13 +245,13 @@ with st.expander(" :arrow_heading_up: Data entry", expanded=True):
                                                 trace_uc.append(trace_s)
                                 except KeyError:
                                     catch_col_spel_error = True
-                                    st.markdown(":red[**Attention!!] Check again the spelling of the column names")
+                                    st.markdown(":red[**Attention!!] Check again the spelling of the column names.")
                             else:
                                 catch_col_same_name_error = True
                                 st.markdown(":red[**Attention!!**] You have selected the same column name for different data. Revise your entries above in order to continue.")
                         else:
                             catch_col_empty_error = True
-                            st.markdown(":red[**Attention!!**] One or more of the column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
+                            st.markdown(":red[**Attention!!**] One or more of the requested column names have been left empty. Revise your entries above in order to continue.")
 
 with st.expander(" :arrow_right: Visualization", expanded=False):
     st.markdown('''                
@@ -359,7 +359,7 @@ with st.expander(" :arrow_right: Visualization", expanded=False):
                                             st.markdown(":red[**Attention!!**] In the **Data entry** you haven't selected your preferred LVDT for plotting.")
                                 #pages[selected_plot]()
                             except:
-                                st.markdown(":red[**Attention!!**] Make sure that you have selected the column names above correctly.")                                
+                                st.markdown(":red[**Attention!!**] Make sure that in the **Data entry** you have selected the column names correctly.")                                
                     else:
                         st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
                 else:
