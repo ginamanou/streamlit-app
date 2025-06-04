@@ -60,12 +60,12 @@ with st.sidebar:
         - The interface was designed to be used in a linear manner from top to bottom.  
                 
         - Make sure that you load **csv** files that do not contain any special characters.
-        - The structure of the files needs to only involve **a header and the data.**  
+        - The structure of the imported files needs to only involve **a header and the data.**  
                   
           If there is extra description or other rows at the beginning or at the end **they should be first removed** !!   
             """)
     
-with st.expander(" :arrow_heading_up: Imports section", expanded=True):
+with st.expander(" :arrow_heading_up: Data entry", expanded=True):
     st.markdown('''                
         :point_down: :blue[In this section you are expected to provide certain information regarding the input data]
     '''
@@ -77,9 +77,9 @@ with st.expander(" :arrow_heading_up: Imports section", expanded=True):
 
     if st.session_state.type_of_exp == "Uniaxial creep":
         col1, col2, col3 = st.columns(3)
-        time_uc = col1.text_input("Select the column that represents **Time** on your data", key='select_uc_time_col')
-        lvdt1 = col2.text_input("Select the column that represents **LVDT1** on your data", key='select_lvdt1_col')
-        lvdt2 = col3.text_input("Select the column that represents **LVDT2** on your data", key='select_lvdt2_col')
+        time_uc = col1.text_input("Type the name of the column that represents **Time** on your data", key='select_uc_time_col')
+        lvdt1 = col2.text_input("Type the name of the column that represents **LVDT1** on your data", key='select_lvdt1_col')
+        lvdt2 = col3.text_input("Type the name of the column that represents **LVDT2** on your data", key='select_lvdt2_col')
     else:
         col1, col2, col3, col4 = st.columns(4)
         time_spc = col1.text_input("Type the name of the column that represents **Time** in your data", key="select_spc_time_col")
@@ -89,14 +89,14 @@ with st.expander(" :arrow_heading_up: Imports section", expanded=True):
 
     if (st.session_state.type_of_exp == "Uniaxial creep"):
         st.markdown('<p class="small-font">- Add the full paths of the experiments you want to visualize/analyze.</p>', unsafe_allow_html=True)
-        st.markdown('<p class="small-font">- Add the gauge length of each specimen.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="small-font">- Add the gauge length of each specimen in mm.</p>', unsafe_allow_html=True)
         st.markdown('<p class="small-font">- After adding an entry press enter.</p>', unsafe_allow_html=True)
         #st.markdown('<p class="small-font">- Avoid deleting the content of a row using the backspace. Instead, delete the entire row by selecting it and clicking on the trash bin symbol in the top right of the table.</p>', unsafe_allow_html=True)
 
-        table_file_input = pd.DataFrame(columns=['Path', 'Gauge length', 'Preferred LVDT for plotting'])
+        table_file_input = pd.DataFrame(columns=['Path', 'Gauge length [mm]', 'Preferred LVDT for plotting'])
         edit_table_file_input = st.data_editor(table_file_input, column_config={
             "Path": st.column_config.TextColumn(width='large'),
-            "Gauge length": st.column_config.NumberColumn(width='small'),
+            "Gauge length [mm]": st.column_config.NumberColumn(width='small'),
             "Preferred LVDT for plotting": st.column_config.SelectboxColumn(options=["LVDT 1", "LVDT 2", "Average of LVDTs"], width='small')
         }, hide_index=True, num_rows= 'dynamic', use_container_width=True, key="file_upload_df")
         
@@ -202,7 +202,7 @@ with st.expander(" :arrow_heading_up: Imports section", expanded=True):
                                 try:
                                     df_new = df_uc_for_app(df, st.session_state.select_uc_time_col, st.session_state.select_lvdt1_col, st.session_state.select_lvdt2_col)
 
-                                    row_gauge = edit_table_file_input.loc[i, "Gauge length"]
+                                    row_gauge = edit_table_file_input.loc[i, "Gauge length [mm]"]
                                     selected_lvdt = edit_table_file_input.loc[i, "Preferred LVDT for plotting"]
 
                                     if row_gauge != None:
@@ -241,7 +241,7 @@ with st.expander(" :arrow_heading_up: Imports section", expanded=True):
                                 except KeyError:
                                     st.markdown(":red[**Attention!!] Check again the spelling of the column names")
 
-with st.expander(" :arrow_right: Visualization section", expanded=False):
+with st.expander(" :arrow_right: Visualization", expanded=False):
     st.markdown('''                
         :point_down: :blue[In this section you can visualize one or multiple experiments and compare them]
     '''
@@ -293,9 +293,9 @@ with st.expander(" :arrow_right: Visualization section", expanded=False):
                         except ValueError:
                             st.markdown(":red[**Attention!!**] Make sure that you have selected the column names above correctly.")
                 else:
-                    st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your entries in the **Imports section** in order to continue.")
+                    st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
             else:
-                st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your entries in the **Imports section** in order to continue.")
+                st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
             
     if (st.session_state.type_of_exp == "Uniaxial creep"):
         if ("select_uc_time_col" in st.session_state) & ("select_lvdt1_col" in st.session_state) & ("select_lvdt2_col" in st.session_state):
@@ -331,7 +331,7 @@ with st.expander(" :arrow_right: Visualization section", expanded=False):
                         try:
                             if selected_plot == 'Preview data':
                                 if (row_gauge == None):
-                                    st.markdown(":red[**Attention!!**] In the **Imports section** you haven't added information regarding the gauge length.")
+                                    st.markdown(":red[**Attention!!**] In the **Data entry** you haven't added information regarding the gauge length.")
                                 else:
                                     pages[selected_plot]()
                             else:
@@ -339,18 +339,18 @@ with st.expander(" :arrow_right: Visualization section", expanded=False):
                                     pages[selected_plot]()
                                 else:
                                     if (row_gauge == None):
-                                        st.markdown(":red[**Attention!!**] In the **Imports section** you haven't added information regarding the gauge length.")
+                                        st.markdown(":red[**Attention!!**] In the **Data entry** you haven't added information regarding the gauge length.")
                                     if (selected_lvdt == None):
-                                        st.markdown(":red[**Attention!!**] In the **Imports section** you haven't selected your preferred LVDT for plotting.")
+                                        st.markdown(":red[**Attention!!**] In the **Data entry** you haven't selected your preferred LVDT for plotting.")
                             #pages[selected_plot]()
                         except:
                             st.markdown(":red[**Attention!!**] Make sure that you have selected the column names above correctly.")                                
                 else:
-                    st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your entries in the **Imports section** in order to continue.")
+                    st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
             else:
-                st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your entries in the **Imports section** in order to continue.")
+                st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
 
-with st.expander(" :arrow_right: Analysis section", expanded=False):
+with st.expander(" :arrow_right: Analysis", expanded=False):
     st.markdown(r"""                
         :point_down: :blue[In this section you can analyze the data that you want by selecting below one of the experiments you have uploaded]
     """
@@ -402,7 +402,7 @@ with st.expander(" :arrow_right: Analysis section", expanded=False):
                         # t0 = 0
                         # tR = df_lim.TotalSeconds[len(df_lim)-1]
                         
-                        st.markdown(''' **<p class="big-font"> :blue[STEP 1:] Preprocessing/Cleaning of the deflection data (if necessary)</p>** ''', unsafe_allow_html=True)
+                        st.markdown(''' **<p class="big-font"> :blue[STEP 1:] Preprocessing / Cleaning of the deflection data (if necessary)</p>** ''', unsafe_allow_html=True)
                         col1, col2 = st.columns([1, 2])
                         col1.text("")
                         col1.text("")
@@ -948,9 +948,9 @@ with st.expander(" :arrow_right: Analysis section", expanded=False):
                     else:
                         st.markdown(":red[**Attention!!**] You haven't provided a path")
                 else:
-                    st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your entries in the **Imports section** in order to continue.")
+                    st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
             else:
-                st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your entries in the **Imports section** in order to continue.")
+                st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
 
     if (st.session_state.type_of_exp == "Uniaxial creep"):
         if ("select_uc_time_col" in st.session_state) & ("select_lvdt1_col" in st.session_state) & ("select_lvdt2_col" in st.session_state):
@@ -958,7 +958,7 @@ with st.expander(" :arrow_right: Analysis section", expanded=False):
                 if (st.session_state.select_uc_time_col != st.session_state.select_lvdt1_col) & (st.session_state.select_uc_time_col != st.session_state.select_lvdt2_col) & (st.session_state.select_lvdt1_col != st.session_state.select_lvdt2_col):
                     if (edit_table_file_input.empty != True):
                         ch1 = False
-                        for metr in edit_table_file_input["Gauge length"]:
+                        for metr in edit_table_file_input["Gauge length [mm]"]:
                             if metr == None:
                                 ch1 = True
                         if ch1 == False:
@@ -1227,10 +1227,10 @@ with st.expander(" :arrow_right: Analysis section", expanded=False):
                                                     mime='text/csv'):
                                     st.balloons()
                         else:
-                            st.markdown(":red[**Attention!!**] You haven't added information regarding the gauge length. Revise your entries in the **Imports section** in order to continue.")
+                            st.markdown(":red[**Attention!!**] You haven't added information regarding the gauge length. Revise your inputs in the **Data entry** in order to continue.")
                     else:
                         st.markdown(":red[**Attention!!**] You haven't provided a path")
                 else:
-                    st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your entries in the **Imports section** in order to continue.")
+                    st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
             else:
-                st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your entries in the **Imports section** in order to continue.")
+                st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
