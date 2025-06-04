@@ -95,8 +95,8 @@ with st.expander(" :arrow_heading_up: Data entry", expanded=True):
     if st.session_state.type_of_exp == "Uniaxial creep":
         col1, col2, col3 = st.columns(3)
         time_uc = col1.text_input("Type below the name of the column that represents **Time** in your data:", placeholder="e.g. Time", key='select_uc_time_col')
-        lvdt1 = col2.text_input("Type below the name of the column that represents **LVDT 1** in your data:", placeholder="e.g. LVDT1", key='select_lvdt1_col')
-        lvdt2 = col3.text_input("Type below the name of the column that represents **LVDT 2** in your data:", placeholder="e.g. LVDT2", key='select_lvdt2_col')
+        lvdt1 = col2.text_input("Type below the name of the column that represents **LVDT 1** in your data:", placeholder="e.g. LVDT 1", key='select_lvdt1_col')
+        lvdt2 = col3.text_input("Type below the name of the column that represents **LVDT 2** in your data:", placeholder="e.g. LVDT 2", key='select_lvdt2_col')
     else:
         col1, col2, col3, col4 = st.columns(4)
         time_spc = col1.text_input("Type below the name of the column that represents **Time** in your data:", placeholder="e.g. Time", key="select_spc_time_col")
@@ -114,6 +114,7 @@ with st.expander(" :arrow_heading_up: Data entry", expanded=True):
     catch_path_error = False
     catch_col_spel_error = False
     catch_col_same_name_error = False
+    catch_col_empty_error = False
 
     if (edit_table_file_input.empty != True): 
         # if edit_table_file_input.loc[0, "Path"] != None:
@@ -140,9 +141,7 @@ with st.expander(" :arrow_heading_up: Data entry", expanded=True):
                     st.session_state.df_added = "valid"   
                 except FileNotFoundError:
                     catch_path_error = True
-                    st.markdown(":red[**Attention!!**] You haven't provided a valid path. Make sure to add the full path to your csv files.")
-
-                #st.write(st.session_state)
+                    st.markdown(":red[**Attention!!**] You have provided an invalid path. Make sure to add the full path to your csv files.")
                 
                 file_with_ext = row_path.split('/')[-1]
                 folder_name = file_with_ext.removesuffix('.csv')
@@ -188,6 +187,9 @@ with st.expander(" :arrow_heading_up: Data entry", expanded=True):
                             else:
                                 catch_col_same_name_error = True
                                 st.markdown(":red[**Attention!!**] You have selected the same column name for different data. Revise your entries above in order to continue.")
+                        else:
+                            catch_col_empty_error = True
+                            st.markdown(":red[**Attention!!**] One of the column names has been left empty. Revise your entry data")
 
                 if (st.session_state.type_of_exp == "Uniaxial creep") & (st.session_state.df_added == "valid"):
                     count_blanks_uc = 0
@@ -201,7 +203,6 @@ with st.expander(" :arrow_heading_up: Data entry", expanded=True):
                         pass
                     else:
                         if (st.session_state.select_uc_time_col != "") & (st.session_state.select_lvdt1_col != "") & (st.session_state.select_lvdt2_col != ""):
-                            #if ("select_uc_time_col" in st.session_state) & ("select_lvdt1_col" in st.session_state) & ("select_lvdt2_col" in st.session_state):
                             if (st.session_state.select_uc_time_col != st.session_state.select_lvdt1_col) & (st.session_state.select_uc_time_col != st.session_state.select_lvdt2_col) & (st.session_state.select_lvdt1_col != st.session_state.select_lvdt2_col):
                                 try:
                                     df_new = df_uc_for_app(df, st.session_state.select_uc_time_col, st.session_state.select_lvdt1_col, st.session_state.select_lvdt2_col)
@@ -248,6 +249,9 @@ with st.expander(" :arrow_heading_up: Data entry", expanded=True):
                             else:
                                 catch_col_same_name_error = True
                                 st.markdown(":red[**Attention!!**] You have selected the same column name for different data. Revise your entries above in order to continue.")
+                        else:
+                            catch_col_empty_error = True
+                            st.markdown(":red[**Attention!!**] One or more of the column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
 
 with st.expander(" :arrow_right: Visualization", expanded=False):
     st.markdown('''                
@@ -255,7 +259,7 @@ with st.expander(" :arrow_right: Visualization", expanded=False):
     '''
     )  
     
-    if catch_path_error == True:
+    if (catch_path_error == True) | (catch_col_spel_error == True) | (catch_col_same_name_error == True) | (catch_col_empty_error == True):
         pass
     else:
         if (st.session_state.type_of_exp == "Small punch creep"):
@@ -306,7 +310,7 @@ with st.expander(" :arrow_right: Visualization", expanded=False):
                     else:
                         st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
                 else:
-                    st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
+                    pass#st.markdown(":red[**Attention!!**] One or more of the requested column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
         
         if (st.session_state.type_of_exp == "Uniaxial creep"):
             if ("select_uc_time_col" in st.session_state) & ("select_lvdt1_col" in st.session_state) & ("select_lvdt2_col" in st.session_state):
@@ -329,7 +333,6 @@ with st.expander(" :arrow_right: Visualization", expanded=False):
                                 st.plotly_chart(fig_strain, use_container_width=True)
 
                             pages={
-                                "": "",
                                 "Preview data": page_df,
                                 "Creep strain curve": page_creep_strain_plot
                             }
@@ -341,9 +344,7 @@ with st.expander(" :arrow_right: Visualization", expanded=False):
                                         )
                             
                             try:
-                                if selected_plot == "":
-                                    pass
-                                elif selected_plot == 'Preview data':
+                                if selected_plot == 'Preview data':
                                     if (row_gauge == None):
                                         st.markdown(":red[**Attention!!**] In the **Data entry** you haven't added information regarding the gauge length.")
                                     else:
@@ -362,7 +363,7 @@ with st.expander(" :arrow_right: Visualization", expanded=False):
                     else:
                         st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
                 else:
-                    st.markdown(":red[**Attention!!**] One or more of the column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
+                    pass#st.markdown(":red[**Attention!!**] One or more of the requested columns names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
 
 # with st.expander(" :arrow_right: Analysis", expanded=False):
 #     st.markdown(r"""                
