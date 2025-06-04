@@ -77,15 +77,15 @@ with st.expander(" :arrow_heading_up: Data entry", expanded=True):
 
     if st.session_state.type_of_exp == "Uniaxial creep":
         col1, col2, col3 = st.columns(3)
-        time_uc = col1.text_input("Type the name of the column that represents **Time** on your data", key='select_uc_time_col')
-        lvdt1 = col2.text_input("Type the name of the column that represents **LVDT1** on your data", key='select_lvdt1_col')
-        lvdt2 = col3.text_input("Type the name of the column that represents **LVDT2** on your data", key='select_lvdt2_col')
+        time_uc = col1.text_input("- Type below the name of the column that represents **Time** on your data:", key='select_uc_time_col')
+        lvdt1 = col2.text_input("- Type below the name of the column that represents **LVDT1** on your data:", key='select_lvdt1_col')
+        lvdt2 = col3.text_input("- Type below the name of the column that represents **LVDT2** on your data:", key='select_lvdt2_col')
     else:
         col1, col2, col3, col4 = st.columns(4)
-        time_spc = col1.text_input("Type the name of the column that represents **Time** in your data", key="select_spc_time_col")
-        u_col = col2.text_input("Type the name of the column that represents **Deflection** in your data", key="select_u_col")
-        force_col = col3.text_input("Type the name of the column that represents **Force** in your data", key="select_force_col")
-        temp_col = col4.text_input("Type the name of the column that represents **Temperature** in your data", key="select_temp_col")    
+        time_spc = col1.text_input("- Type below the name of the column that represents **Time** in your data:", key="select_spc_time_col")
+        u_col = col2.text_input("- Type below the name of the column that represents **Deflection** in your data:", key="select_u_col")
+        force_col = col3.text_input("- Type below the name of the column that represents **Force** in your data:", key="select_force_col")
+        temp_col = col4.text_input("- Type below the name of the column that represents **Temperature** in your data:", key="select_temp_col")    
 
     if (st.session_state.type_of_exp == "Uniaxial creep"):
         st.markdown('<p class="small-font">- Add the full paths of the experiments you want to visualize/analyze.</p>', unsafe_allow_html=True)

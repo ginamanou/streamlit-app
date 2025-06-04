@@ -323,7 +323,7 @@ def df_spc_for_app(dataframe, time_col, u_col, force_col, temp_col):
 
     # --- Start function ---   
     dataframe.rename(columns={time_col: 'DateTime', u_col: 'u', force_col: 'Force', temp_col: 'Temperature'}, inplace=True)
-    dataframe['DateTime'] = pd.to_datetime(dataframe['DateTime'])#, format='%d-0%m-%y %H:%M:%S.%f')
+    dataframe['DateTime'] = pd.to_datetime(dataframe['DateTime'], errors = 'coerce')#, format='%d-0%m-%y %H:%M:%S.%f')
     time_calculations(dataframe)
     return dataframe
 
