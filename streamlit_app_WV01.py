@@ -979,293 +979,280 @@ with st.expander(" :arrow_right: Analysis", expanded=False):
                     pass#st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
 
         if (st.session_state.type_of_exp == "Uniaxial creep"):
-            if ("select_uc_time_col" in st.session_state) & ("select_lvdt1_col" in st.session_state) & ("select_lvdt2_col" in st.session_state):
-                if (st.session_state.select_uc_time_col != "") & (st.session_state.select_lvdt1_col != "") & (st.session_state.select_lvdt2_col != ""):
-                    if (st.session_state.select_uc_time_col != st.session_state.select_lvdt1_col) & (st.session_state.select_uc_time_col != st.session_state.select_lvdt2_col) & (st.session_state.select_lvdt1_col != st.session_state.select_lvdt2_col):
-                        if (edit_table_file_input.empty != True):
-                            # ch1 = False
-                            # for metr in edit_table_file_input["Gauge length [mm]"]:
-                            #     if metr == None:
-                            #         ch1 = True
-                            # if (ch1 == False) & (catch_path_error == False):
-                            if (catch_path_error == False) & (catch_gauge_empty_error == False):
-                                col1, col2 = st.columns(2)
-                                selected_exp = col1.radio(
-                                    "Choose the experiment you want to analyze",
-                                    names,
-                                    key='selected_exp'
-                                )
+            if (edit_table_file_input.empty != True):
+                col1, col2 = st.columns(2)
+                selected_exp = col1.radio(
+                    "Choose the experiment you want to analyze",
+                    names,
+                    key='selected_exp'
+                )
 
-                                df = all_dfs[selected_exp]
-                                col1, col2 = st.columns(2)
-                                stress = col1.number_input("Type in the **Stress** in MPa under which your experiment was performed", format="%0.1f")
-                                temp = col2.number_input("Type in the **Temperature** in °C under which your experiment was performed", format="%0.1f")
-                                
-                                st.markdown(''' **<p class="big-font"> :blue[STEP 1:] Preprocessing/Cleaning of the strain data (if necessary)</p>** ''', unsafe_allow_html=True)
-                                col1, col2 = st.columns([1, 2])
-                                col1.text("")
-                                col1.text("")
-                                col1.markdown('''
-                                    Often we start logging the data before the full load has been applied.  
-                                    Also, often times the data acquisition continues even after the rupture of the specimen.  
-                                    As a result, the raw data present many invalid values at the beginning and the end of experiments.  
-                                        
-                                    If this is the case, use the interactive tools of the graph on the right to zoom and hover over the datapoints and identify the point of the start of the experiment and the time to rupture.
-                                ''')
+                df = all_dfs[selected_exp]
+                col1, col2 = st.columns(2)
+                stress = col1.number_input("Type in the **Stress** in MPa under which your experiment was performed", format="%0.1f")
+                temp = col2.number_input("Type in the **Temperature** in °C under which your experiment was performed", format="%0.1f")
+                
+                st.markdown(''' **<p class="big-font"> :blue[STEP 1:] Preprocessing / Cleaning of the strain data (if necessary)</p>** ''', unsafe_allow_html=True)
+                col1, col2 = st.columns([1, 2])
+                col1.text("")
+                col1.text("")
+                col1.markdown('''
+                    Often we start logging the data before the full load has been applied.  
+                    Also, often times the data acquisition continues even after the rupture of the specimen.  
+                    As a result, the raw data present many invalid values at the beginning and the end of the experiments.  
+                        
+                    If this is the case, use the interactive tools of the graph on the right to zoom and hover over the datapoints and identify the time when the experiment started and the time to rupture.
+                ''')
 
-                                # Remove NaN values from the selected LVDT
-                                if df.lvdt1.isna().sum() > 0:
-                                    df = df.dropna(subset=['lvdt1'])
-                                    df.reset_index(inplace=True)
-                                    df = df.drop(columns=['index'])
-                                if df.lvdt2.isna().sum() > 0:
-                                    df = df.dropna(subset=['lvdt2'])
-                                    df.reset_index(inplace=True)
-                                    df = df.drop(columns=['index'])                                
+                # Remove NaN values from the selected LVDT
+                if df.lvdt1.isna().sum() > 0:
+                    df = df.dropna(subset=['lvdt1'])
+                    df.reset_index(inplace=True)
+                    df = df.drop(columns=['index'])
+                if df.lvdt2.isna().sum() > 0:
+                    df = df.dropna(subset=['lvdt2'])
+                    df.reset_index(inplace=True)
+                    df = df.drop(columns=['index'])                                
 
-                                #st.write(all_lvdts_for_plot[selected_exp])
-                                if all_lvdts_for_plot[selected_exp] == 'LVDT 1':
-                                    var = 'strain1'
-                                elif all_lvdts_for_plot[selected_exp] == 'LVDT 2':
-                                    var = 'strain2' 
-                                else:
-                                    var = 'strain_avg' 
-
-                                fig_toclean = go.Figure()
-                                fig_toclean.add_trace(go.Scatter(
-                                                        x=df.TotalHours,
-                                                        y=df[var],
-                                                        mode='lines+markers',
-                                                        name="strain uncleaned")
-                                            )
-
-                                fig_toclean.update_layout(title=dict(text="Creep strain curve"),
-                                                    xaxis_title="Time [h]", 
-                                                    yaxis_title="Strain [%]",
-                                                    showlegend=True)
-                                col2.plotly_chart(fig_toclean, use_container_width=True)
-
-                                stop_start = col1.number_input("Type the value of the identified (from the graph) time [in hours] of initial strain (when the full load started being applied).", key='stop_start')
-                                stop_end = col1.number_input("Type the value of the identified (from the graph) time [in hours] to rupture.", key='stop_end')
-                                #st.write(st.session_state)
-
-                                catch_tR_error = False
-                                if (stop_start != 0): 
-                                    if stop_end == 0:
-                                        catch_tR_error = True
-                                    if (stop_end > stop_start):
-                                        df_lim = df[(df.TotalHours >= stop_start) & (df.TotalHours <= stop_end)]
-                                        df_lim.reset_index(inplace=True)
-                                        df_lim = df_lim.drop(columns=['index'])
-                                        df_lim[var] = df_lim[var] - df_lim.loc[0, var]
-
-                                        df_lim['TotalSeconds'] = df_lim['DateTime'].diff().dt.total_seconds().cumsum()       # Calculate the total amount of seconds since the start of the experimet
-                                        df_lim.loc[0, 'TotalSeconds'] = 0
-                                        df_lim['TotalSeconds'] = df_lim['TotalSeconds'].astype(int, errors='ignore')
-                                        df_lim['TotalMinutes'] = df_lim['TotalSeconds']/60
-                                        df_lim['TotalHours'] = df_lim['TotalSeconds']/3600
-
-                                        tR = df_lim.TotalSeconds[len(df_lim)-1]
-                                    else: 
-                                        st.markdown(" :red[**Attention!!**] The time to rupture **cannot** precede the time of initial strain. You haven't entered the values correctly.")
-                                else:
-                                    if (stop_end != 0):
-                                        df_lim = df[:stop_end]
-                                        df_lim.reset_index(inplace=True)
-                                        df_lim = df_lim.drop(columns=['index'])
-
-                                        tR = df_lim.TotalSeconds[len(df_lim)-1]
-                                    else:
-                                        st.markdown("**No cleaning was performed.** The algorithm will proceed with the input data as is.")
-                                        df_lim = df.copy()
-                                        tR = df_lim.TotalSeconds[len(df_lim)-1]
-
-                                t0 = 0                                
-
-                                st.markdown(''' **<p class="big-font"> :blue[STEP 2:] Calculation of the strain rate </p>** ''', unsafe_allow_html=True)
-
-                                col1, col2 = st.columns([1,2])
-                            
-                                col1.text("")
-                                col1.text("")
-                                
-                                col1.markdown(''' 
-                                            The current methodology splits the dataset into sections 
-                                            and calculates the strain rate as the regression slope 
-                                            of all the data points that fall into each section.
-                                            ''')  
-                                col1.markdown(''' <span style="text-decoration:underline"> **:green[Hint:]** </span> The suggested number of sections is **between 100 and 400**.''', unsafe_allow_html=True)
-
-                                sections_num = col1.number_input("Type the number of sections", min_value=50, max_value=500, step=10, key="sections_to_split")
-
-                                if catch_tR_error == True:
-                                    st.markdown(":red[**Attention!!**] You need to enter a valid time to rupture.")
-                                else:
-                                    interval_points = (tR - t0)/int(sections_num)
-
-                                    col1.markdown("Each of the " + str(sections_num) + " sections contains " + str(math.floor(interval_points)) + " data points.")
-
-                                    dvardt, t_points, var_points = calculate_rate_of_variable(df_lim, var, interval_points, t0, tR)
-
-                                    fig1 = make_subplots(specs=[[{"secondary_y": True}]])
-                                    fig1.add_trace(go.Scatter(
-                                                        x=t_points,
-                                                        y=var_points,
-                                                        mode='lines+markers',
-                                                        name="strain"),
-                                                        secondary_y=False,
-                                            )
-                                    
-                                    fig1.add_trace(go.Scatter(
-                                                        x=t_points,
-                                                        y=dvardt,
-                                                        mode='lines+markers',
-                                                        name="strain rate"),
-                                                        secondary_y=True,
-                                                    )
-
-                                    # Add figure title
-                                    fig1.update_layout(
-                                        title_text="Strain & strain rate")
-
-                                    # Set x-axis title
-                                    fig1.update_xaxes(title_text="Time [h]")
-
-                                    # Set y-axes titles
-                                    fig1.update_yaxes(title_text="Strain [%]", secondary_y=False)
-                                    fig1.update_yaxes(title_text="Strain rate [1/h]", secondary_y=True)
-
-                                    col2.plotly_chart(fig1, use_container_width=True)
-
-                                    def secondary_strain(str_rate, time, lower_limit, upper_limit):
-                                        tt_middle = []
-                                        middle_part = []
-                                        for i in range(len(time)):
-                                            if (time[i]>=lower_limit) & (time[i]<=upper_limit):
-                                                tt_middle.append(time[i])
-                                                middle_part.append(str_rate[i])
-
-                                        return middle_part, tt_middle
-                                    
-                                    st.markdown(''' **<p class="big-font"> :blue[STEP 3:] Calculation of the minimum strain rate </p>** ''', unsafe_allow_html=True)
-                                    
-                                    col1, col2 = st.columns([1,2])
-                                    col1.text("")
-                                    col1.text("")
-                                    col1.markdown(''' <span style="text-decoration:underline"> Small description of the methodology </span> ''', unsafe_allow_html=True)
-                                    col1.markdown(''' 
-                                                - First, a second degree polynomial curve is fitted to the datapoints of the strain rate.  
-                                                - Then, the minimum strain rate is considered the same as the minimum point of the fitted curve, in order to reduce uncertainty due to the noise in the signal.  
-                                                    
-                                                Actions to be taken:
-                                                1. Observe and interact with the strain rate graph in STEP 2.
-                                                2. Try to roughly isolate by eye the part of the curve where the minimum strain rate is located.  
-                                                3. Move the sides of the slider so that they match the bounds (in terms of time) of the previously isolated part of the minimum.
-                                                4. The graph depicts the identified minimum strain rate.  
-                                                    ''')
-
-                                    col2.text("")
-                                    col2.text("")
-                                    sel_limits = col2.slider("Select the bounds of the curve where the minimum is located", int(t_points[0]+1), int(t_points[len(t_points)-1]+1), value=(int(t_points[0]+1), int(t_points[len(t_points)-1]+1)))
-                                    # Isolate the middle part of the curve
-                                    middle_part, tt_middle = secondary_strain(dvardt, t_points, sel_limits[0], sel_limits[1])
-
-                                    # Calculate a fitted curve
-                                    polynomial = calc_polynomial(middle_part, tt_middle)
-
-                                    # Find the global minimum
-                                    crit = polynomial.deriv().r
-                                    r_crit = crit[crit.imag==0].real
-                                    test = polynomial.deriv(2)(r_crit)
-
-                                    # Compute the global minimum excluding range boundaries
-                                    x_min1 = r_crit[test>0]
-                                    y_min1 = polynomial(x_min1)
-
-                                    # Compute a curve based on the fitted poly
-                                    xc = np.arange(int(tt_middle[0]), int(tt_middle[len(tt_middle)-1]+1), 0.02)
-                                    yc = polynomial(xc)
-
-                                    fig3 = go.Figure()
-                                    fig3.add_trace(go.Scatter(
-                                                        x=tt_middle,
-                                                        y=middle_part,
-                                                        mode='lines+markers',
-                                                        name="strain rate",
-                                                        showlegend=True)
-                                            )
-                                    
-                                    fig3.add_trace(go.Scatter(
-                                                        x=xc,
-                                                        y=yc,
-                                                        mode='lines',
-                                                        name="fitted curve",
-                                                        line=dict(
-                                                            color='mediumvioletred'
-                                                        ),
-                                                        showlegend=True)
-                                            )
-
-                                    fig3.add_trace(go.Scatter(
-                                                        x=x_min1,
-                                                        y=y_min1,
-                                                        mode='markers',
-                                                        name="minimum",
-                                                        marker=dict(
-                                                                    color='MediumPurple',
-                                                                    size=12#,
-                                                                    # line=dict(
-                                                                    #     color='MediumPurple',
-                                                                    #     width=12
-                                                                    # )
-                                                                ),
-                                                                showlegend=True
-                                                            )
-                                                        )
-
-                                    # Add figure title
-                                    fig3.update_layout(title_text="Minimum strain rate")
-
-                                    # Set axes titles
-                                    fig3.update_xaxes(title_text="Time [h]")
-                                    fig3.update_yaxes(title_text="Strain rate [1/h]")
-
-                                    col2.plotly_chart(fig3, use_container_width=True)
-
-                                    st.markdown(''' **<p class="big-font"> :blue[STEP 4:] Results </p>** ''', unsafe_allow_html=True)
-                                    
-                                    time1 = x_min1[0].copy()
-                                    str_rate_min1 = y_min1[0].copy()
-                                    str_at_u_rate_min1 = df_lim[var][(df_lim.TotalHours>=time1)].values[0]/1000  # in mm 
-
-                                    cols = ['Experiment', 'Temperature [°C]', 'Stress [N]', 'Time to rupture [h]', 'Minimum strain rate [1/h]', 'Time at minimum strain rate [h]', 'Strain at minimum strain rate [%]']
-                                    uc_matrix = pd.DataFrame(columns = cols)
-                                    uc_matrix.loc[len(uc_matrix)] = [selected_exp, temp, stress, tR, str_rate_min1, time1, str_at_u_rate_min1]
-                                    csv = uc_matrix.to_csv().encode('utf-8')
-
-                                    if 'final_table' not in st.session_state:
-                                        st.session_state.final_table = False
-
-                                    def show_table():
-                                        st.session_state.final_table = not st.session_state.final_table
-
-                                    st.button('Show/Hide table', on_click=show_table)
-                                    if st.session_state.final_table:
-                                    #if st.button("Show table", key='show_final_table'):
-                                        st.table(uc_matrix)
-                                        st.text("")
-
-                                        if st.download_button(
-                                                            label="Download",
-                                                            data=csv,
-                                                            file_name=f'streamlit_output.csv',
-                                                            mime='text/csv'):
-                                            st.balloons()
-                            else:
-                                st.markdown(":red[**Attention!!**] You haven't added information regarding the gauge length. Revise your inputs in the **Data entry** in order to continue.")
-                        else:
-                            st.markdown(":red[**Attention!!**] You haven't provided a path")
-                    else:
-                        st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
+                #st.write(all_lvdts_for_plot[selected_exp])
+                if all_lvdts_for_plot[selected_exp] == 'LVDT 1':
+                    var = 'strain1'
+                elif all_lvdts_for_plot[selected_exp] == 'LVDT 2':
+                    var = 'strain2' 
                 else:
-                    pass#st.markdown(":red[**Attention!!**] One or more of the representative column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
+                    var = 'strain_avg' 
+
+                fig_toclean = go.Figure()
+                fig_toclean.add_trace(go.Scatter(
+                                        x=df.TotalHours,
+                                        y=df[var],
+                                        mode='lines+markers',
+                                        name="strain uncleaned")
+                            )
+
+                fig_toclean.update_layout(title=dict(text="Creep strain curve"),
+                                    xaxis_title="Time [h]", 
+                                    yaxis_title="Strain [%]",
+                                    showlegend=True)
+                col2.plotly_chart(fig_toclean, use_container_width=True)
+
+                stop_start = col1.number_input("Type the value of the identified (from the graph) time [in hours] of initial strain (when the full load started being applied).",  key='stop_start')
+                stop_end = col1.number_input("Type the value of the identified (from the graph) time [in hours] to rupture.", key='stop_end')
+                #st.write(st.session_state)
+
+                catch_tR_error = False
+                if (stop_start != 0): 
+                    if stop_end == 0:
+                        catch_tR_error = True
+                    if (stop_end > stop_start):
+                        df_lim = df[(df.TotalHours >= stop_start) & (df.TotalHours <= stop_end)]
+                        df_lim.reset_index(inplace=True)
+                        df_lim = df_lim.drop(columns=['index'])
+                        df_lim[var] = df_lim[var] - df_lim.loc[0, var]
+
+                        df_lim['TotalSeconds'] = df_lim['DateTime'].diff().dt.total_seconds().cumsum()       # Calculate the total amount of seconds since the start of the experimet
+                        df_lim.loc[0, 'TotalSeconds'] = 0
+                        df_lim['TotalSeconds'] = df_lim['TotalSeconds'].astype(int, errors='ignore')
+                        df_lim['TotalMinutes'] = df_lim['TotalSeconds']/60
+                        df_lim['TotalHours'] = df_lim['TotalSeconds']/3600
+
+                        tR = df_lim.TotalHours[len(df_lim)-1]
+                    else: 
+                        st.markdown(" :red[**Attention!!**] The time to rupture **cannot** precede the time of initial strain. You haven't entered the values correctly.")
+                else:
+                    if (stop_end != 0):
+                        df_lim = df[:int(stop_end)]
+                        df_lim.reset_index(inplace=True)
+                        df_lim = df_lim.drop(columns=['index'])
+
+                        tR = df_lim.TotalHours[len(df_lim)-1]
+                    else:
+                        st.markdown(" :red[**Attention!!**] **No cleaning was performed.** If the initial timestep and the time to rupture will not be specified, the algorithm will proceed with the input data as is.")
+                        df_lim = df.copy()
+                        tR = df_lim.TotalHours[len(df_lim)-1]
+
+                t0 = 0                                
+
+                st.markdown(''' **<p class="big-font"> :blue[STEP 2:] Calculation of the strain rate </p>** ''', unsafe_allow_html=True)
+
+                col1, col2 = st.columns([1,2])
+            
+                col1.text("")
+                col1.text("")
+                
+                col1.markdown(''' 
+                            The current methodology splits the dataset into sections 
+                            and calculates the strain rate as the regression slope 
+                            of all the data points that fall into each section.
+                            ''')  
+                col1.markdown(''' <span style="text-decoration:underline"> **:green[Hint:]** </span> The suggested number of sections is **between 100 and 400**.''', unsafe_allow_html=True)
+
+                sections_num = col1.number_input("Type the number of sections", min_value=50, max_value=500, step=10, key="sections_to_split")
+
+                if catch_tR_error == True:
+                    st.markdown(":red[**Attention!!**] You need to enter a valid time to rupture.")
+                else:
+                    interval_points = (tR - t0)/int(sections_num)
+
+                    col1.markdown("Each of the " + str(sections_num) + " sections contains " + str(math.floor(interval_points)) + " data points.")
+
+                    dvardt, t_points, var_points = calculate_rate_of_variable(df_lim, var, interval_points, t0, tR)
+
+                    fig1 = make_subplots(specs=[[{"secondary_y": True}]])
+                    fig1.add_trace(go.Scatter(
+                                        x=t_points,
+                                        y=var_points,
+                                        mode='lines+markers',
+                                        name="strain"),
+                                        secondary_y=False,
+                            )
+                    
+                    fig1.add_trace(go.Scatter(
+                                        x=t_points,
+                                        y=dvardt,
+                                        mode='lines+markers',
+                                        name="strain rate"),
+                                        secondary_y=True,
+                                    )
+
+                    # Add figure title
+                    fig1.update_layout(
+                        title_text="Strain & strain rate")
+
+                    # Set x-axis title
+                    fig1.update_xaxes(title_text="Time [h]")
+
+                    # Set y-axes titles
+                    fig1.update_yaxes(title_text="Strain [%]", secondary_y=False)
+                    fig1.update_yaxes(title_text="Strain rate [1/h]", secondary_y=True)
+
+                    col2.plotly_chart(fig1, use_container_width=True)
+
+                    def secondary_strain(str_rate, time, lower_limit, upper_limit):
+                        tt_middle = []
+                        middle_part = []
+                        for i in range(len(time)):
+                            if (time[i]>=lower_limit) & (time[i]<=upper_limit):
+                                tt_middle.append(time[i])
+                                middle_part.append(str_rate[i])
+
+                        return middle_part, tt_middle
+                    
+                    st.markdown(''' **<p class="big-font"> :blue[STEP 3:] Calculation of the minimum strain rate </p>** ''', unsafe_allow_html=True)
+                    
+                    col1, col2 = st.columns([1,2])
+                    col1.text("")
+                    col1.text("")
+                    col1.markdown(''' <span style="text-decoration:underline"> Small description of the methodology </span> ''', unsafe_allow_html=True)
+                    col1.markdown(''' 
+                                - First, a second degree polynomial curve is fitted to the datapoints of the strain rate.  
+                                - Then, the minimum strain rate is considered the same as the minimum point of the fitted curve, in order to reduce uncertainty due to the noise in the signal.  
+                                    
+                                Actions to be taken:
+                                1. Observe and interact with the strain rate graph in STEP 2.
+                                2. Try to roughly isolate by eye the part of the curve where the minimum strain rate is located.  
+                                3. Move the sides of the slider so that they match the bounds (in terms of time) of the previously isolated part of the minimum.
+                                4. The graph depicts the identified minimum strain rate.  
+                                    ''')
+
+                    col2.text("")
+                    col2.text("")
+
+                    st.write(stop_start, stop_end, t0, tR, t_points)#[0], t_points[len(t_points)-1], len(t_points))
+                    sel_limits = col2.slider("Select the bounds of the curve where the minimum is located", int(t_points[0].min())+1, int(t_points[len(t_points)-1].max()), value=(int(t_points[0].min())+1, int(t_points[len(t_points)-1].max())))#int(stop_start), int(stop_end), value=(int(stop_start), int(stop_end)))
+                    st.write(sel_limits)    
+
+                    # Isolate the middle part of the curve
+                    middle_part, tt_middle = secondary_strain(dvardt, t_points, sel_limits[0], sel_limits[1])
+
+                    # Calculate a fitted curve
+                    polynomial = calc_polynomial(middle_part, tt_middle)
+
+                    # Find the global minimum
+                    crit = polynomial.deriv().r
+                    r_crit = crit[crit.imag==0].real
+                    test = polynomial.deriv(2)(r_crit)
+
+                    # Compute the global minimum excluding range boundaries
+                    x_min1 = r_crit[test>0]
+                    y_min1 = polynomial(x_min1)
+
+                    # Compute a curve based on the fitted poly
+                    xc = np.arange(int(tt_middle[0]), int(tt_middle[len(tt_middle)-1]+1), 0.02)
+                    yc = polynomial(xc)
+
+                    fig3 = go.Figure()
+                    fig3.add_trace(go.Scatter(
+                                        x=tt_middle,
+                                        y=middle_part,
+                                        mode='lines+markers',
+                                        name="strain rate",
+                                        showlegend=True)
+                            )
+                    
+                    fig3.add_trace(go.Scatter(
+                                        x=xc,
+                                        y=yc,
+                                        mode='lines',
+                                        name="fitted curve",
+                                        line=dict(
+                                            color='mediumvioletred'
+                                        ),
+                                        showlegend=True)
+                            )
+
+                    fig3.add_trace(go.Scatter(
+                                        x=x_min1,
+                                        y=y_min1,
+                                        mode='markers',
+                                        name="minimum",
+                                        marker=dict(
+                                                    color='MediumPurple',
+                                                    size=12#,
+                                                    # line=dict(
+                                                    #     color='MediumPurple',
+                                                    #     width=12
+                                                    # )
+                                                ),
+                                                showlegend=True
+                                            )
+                                        )
+
+                    # Add figure title
+                    fig3.update_layout(title_text="Minimum strain rate")
+
+                    # Set axes titles
+                    fig3.update_xaxes(title_text="Time [h]")
+                    fig3.update_yaxes(title_text="Strain rate [1/h]")
+
+                    col2.plotly_chart(fig3, use_container_width=True)
+
+                    st.markdown(''' **<p class="big-font"> :blue[STEP 4:] Results </p>** ''', unsafe_allow_html=True)
+                    
+                    time1 = x_min1[0].copy()
+                    str_rate_min1 = y_min1[0].copy()
+                    str_at_u_rate_min1 = df_lim[var][(df_lim.TotalHours>=time1)].values[0]/1000  # in mm 
+
+                    cols = ['Experiment', 'Temperature [°C]', 'Stress [N]', 'Time to rupture [h]', 'Minimum strain rate [1/h]', 'Time at minimum strain rate [h]', 'Strain at minimum strain rate [%]']
+                    uc_matrix = pd.DataFrame(columns = cols)
+                    uc_matrix.loc[len(uc_matrix)] = [selected_exp, temp, stress, tR, str_rate_min1, time1, str_at_u_rate_min1]
+                    csv = uc_matrix.to_csv().encode('utf-8')
+
+                    if 'final_table' not in st.session_state:
+                        st.session_state.final_table = False
+
+                    def show_table():
+                        st.session_state.final_table = not st.session_state.final_table
+
+                    st.button('Show/Hide table', on_click=show_table)
+                    if st.session_state.final_table:
+                    #if st.button("Show table", key='show_final_table'):
+                        st.table(uc_matrix)
+                        st.text("")
+
+                        if st.download_button(
+                                            label="Download",
+                                            data=csv,
+                                            file_name=f'streamlit_output.csv',
+                                            mime='text/csv'):
+                            st.balloons()
