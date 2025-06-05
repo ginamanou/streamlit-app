@@ -308,7 +308,7 @@ with st.expander(" :arrow_right: Visualization", expanded=False):
                             except ValueError:
                                 st.markdown(":red[**Attention!!**] Make sure that you have selected the column names above correctly.")
                     else:
-                        st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
+                        st.markdown(":red[**Attention!!**] You have typed the same name for different data columns. Revise your inputs in the **Data entry** in order to continue.")
                 else:
                     pass#st.markdown(":red[**Attention!!**] One or more of the requested column names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
         
@@ -361,7 +361,7 @@ with st.expander(" :arrow_right: Visualization", expanded=False):
                             except:
                                 st.markdown(":red[**Attention!!**] Make sure that in the **Data entry** you have selected the column names correctly.")                                
                     else:
-                        st.markdown(":red[**Attention!!**] You have selected the same column name as representative of different data. Revise your inputs in the **Data entry** in order to continue.")
+                        st.markdown(":red[**Attention!!**] You have typed the same name for different data columns. Revise your inputs in the **Data entry** in order to continue.")
                 else:
                     pass#st.markdown(":red[**Attention!!**] One or more of the requested columns names have been left empty. Revise your inputs in the **Data entry** in order to continue.")
 
